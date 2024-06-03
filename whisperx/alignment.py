@@ -55,6 +55,11 @@ DEFAULT_ALIGN_MODELS_HF = {
     "ml": "gvs/wav2vec2-large-xlsr-malayalam",
     "no": "NbAiLab/nb-wav2vec2-1b-bokmaal",
     "nn": "NbAiLab/nb-wav2vec2-300m-nynorsk",
+    "ro": "gigant/romanian-wav2vec2",
+    "sk": "infinitejoy/wav2vec2-large-xls-r-300m-slovak",
+    "sr": "dnikolic/wav2vec2-xlsr-530-serbian-colab",
+    "hu": "jonatasgrosman/wav2vec2-large-xlsr-53-hungarian",
+    "pl": "facebook/wav2vec2-large-xlsr-53-polish"
 }
 
 

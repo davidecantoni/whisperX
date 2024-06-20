@@ -201,6 +201,9 @@ class FasterWhisperPipeline(Pipeline):
                 start = 0
                 end = CHUNK_LENGTH * SAMPLE_RATE - 1
             language = language or self.detect_language(audio[start:end+1])
+            if language == "sr":
+                print("Changing language from sr (Serbian) to hr (Croatian)")
+                language = "hr"
             task = task or "transcribe"
             self.tokenizer = faster_whisper.tokenizer.Tokenizer(self.model.hf_tokenizer,
                                                                 self.model.model.is_multilingual, task=task,

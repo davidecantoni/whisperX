@@ -57,10 +57,11 @@ DEFAULT_ALIGN_MODELS_HF = {
     "nn": "NbAiLab/nb-wav2vec2-300m-nynorsk",
     "ro": "gigant/romanian-wav2vec2",
     "sk": "infinitejoy/wav2vec2-large-xls-r-300m-slovak",
-    "sr": "DrishtiSharma/wav2vec2-large-xls-r-300m-sr-v4",
+    "sr": "dnikolic/wav2vec2-xlsr-530-serbian-colab",
     "hu": "jonatasgrosman/wav2vec2-large-xlsr-53-hungarian",
-    "pl": "facebook/wav2vec2-large-xlsr-53-polish",
-    "bg": "infinitejoy/wav2vec2-large-xls-r-300m-bulgarian"
+    "bg": "infinitejoy/wav2vec2-large-xls-r-300m-bulgarian",
+    "hr": "dnikolic/wav2vec2-xlsr-530-serbian-colab",
+    "pl": "facebook/wav2vec2-large-xlsr-53-polish"
 }
 
 

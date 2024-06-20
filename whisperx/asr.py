@@ -9,7 +9,7 @@ import torch
 from transformers import Pipeline
 from transformers.pipelines.pt_utils import PipelineIterator
 
-from .audio import N_SAMPLES, SAMPLE_RATE, load_audio, log_mel_spectrogram
+from .audio import N_SAMPLES, SAMPLE_RATE, CHUNK_LENGTH, load_audio, log_mel_spectrogram
 from .vad import load_vad_model, merge_chunks
 from .types import TranscriptionResult, SingleSegment
 
@@ -192,6 +192,15 @@ class FasterWhisperPipeline(Pipeline):
         )
         if self.tokenizer is None:
             language = language or self.detect_language(audio)
+            #select the longest vad_segment for laguage detection, otherwse the inital part
+            if vad_segments:
+                longest_idx = max(range(len(vad_segments)), key=lambda i: vad_segments[i]['end'] - vad_segments[i]['start'])
+                start = round(vad_segments[longest_idx]['start'] * SAMPLE_RATE)
+                end = round(vad_segments[longest_idx]['end'] * SAMPLE_RATE)
+            else:
+                start = 0
+                end = CHUNK_LENGTH * SAMPLE_RATE - 1
+            language = language or self.detect_language(audio[start:end+1])
             task = task or "transcribe"
             self.tokenizer = faster_whisper.tokenizer.Tokenizer(self.model.hf_tokenizer,
                                                                 self.model.model.is_multilingual, task=task,

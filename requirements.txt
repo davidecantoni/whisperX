@@ -4,4 +4,4 @@ torchaudio>=2
 transformers
 pandas
 setuptools>=65
-nltk
+nltk==3.9b1

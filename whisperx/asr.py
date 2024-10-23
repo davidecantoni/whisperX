@@ -191,7 +191,6 @@ class FasterWhisperPipeline(Pipeline):
             offset=self._vad_params["vad_offset"],
         )
         if self.tokenizer is None:
-            language = language or self.detect_language(audio)
             #select the longest vad_segment for laguage detection, otherwse the inital part
             if vad_segments:
                 longest_idx = max(range(len(vad_segments)), key=lambda i: vad_segments[i]['end'] - vad_segments[i]['start'])

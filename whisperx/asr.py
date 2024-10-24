@@ -191,6 +191,7 @@ class FasterWhisperPipeline(Pipeline):
             offset=self._vad_params["vad_offset"],
         )
         if self.multi_language_detect:
+            task = task or "transcribe"
             for seg in vad_segments:
                 start = round(seg['start'] * SAMPLE_RATE)
                 end = round(seg['end'] * SAMPLE_RATE)
@@ -248,6 +249,10 @@ class FasterWhisperPipeline(Pipeline):
 
         for lvs in lang_vad_segments:        
             progress = 0
+            if self.multi_language_detect:
+                self.tokenizer = faster_whisper.tokenizer.Tokenizer(self.model.hf_tokenizer,
+                                                                    self.model.model.is_multilingual, task=task,
+                                                                    language=lvs[0]['lang'])
             for idx, out in enumerate(self.__call__(data(audio, lvs), batch_size=batch_size, num_workers=num_workers)):
                 if print_progress:
                     base_progress = ((progress + idx + 1) / total_segments) * 100
@@ -260,7 +265,8 @@ class FasterWhisperPipeline(Pipeline):
                     {
                         "text": text,
                         "start": round(lvs[idx]['start'], 3),
-                        "end": round(lvs[idx]['end'], 3)
+                        "end": round(lvs[idx]['end'], 3),
+                        "lang": lvs[0]['lang']
                     }
                 )
             progress += len(lvs)

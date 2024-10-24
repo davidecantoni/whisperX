@@ -60,8 +60,11 @@ DEFAULT_ALIGN_MODELS_HF = {
     "hr": "classla/wav2vec2-xls-r-parlaspeech-hr",
 }
 
-
+loaded_models = {}
 def load_align_model(language_code, device, model_name=None, model_dir=None):
+    if language_code in loaded_models:
+        return loaded_models[language_code]
+    
     if model_name is None:
         # use default model
         if language_code in DEFAULT_ALIGN_MODELS_TORCH:
@@ -94,6 +97,7 @@ def load_align_model(language_code, device, model_name=None, model_dir=None):
 
     align_metadata = {"language": language_code, "dictionary": align_dictionary, "type": pipeline_type}
 
+    loaded_models[language_code] = (align_model, align_metadata)
     return align_model, align_metadata
 
 
@@ -121,9 +125,9 @@ def align(
     
     MAX_DURATION = audio.shape[1] / SAMPLE_RATE
 
-    model_dictionary = align_model_metadata["dictionary"]
-    model_lang = align_model_metadata["language"]
-    model_type = align_model_metadata["type"]
+    # model_dictionary = align_model_metadata["dictionary"]
+    # model_lang = align_model_metadata["language"]
+    # model_type = align_model_metadata["type"]
 
     # 1. Preprocess to keep only characters in dictionary
     total_segments = len(transcript)
@@ -133,7 +137,12 @@ def align(
             base_progress = ((sdx + 1) / total_segments) * 100
             percent_complete = (50 + base_progress / 2) if combined_progress else base_progress
             print(f"Progress: {percent_complete:.2f}%...")
-            
+        
+        model, align_model_metadata = load_align_model(segment['lang'], device)    
+        model_dictionary = align_model_metadata["dictionary"]
+        model_lang = align_model_metadata["language"]
+        model_type = align_model_metadata["type"]
+    
         num_leading = len(segment["text"]) - len(segment["text"].lstrip())
         num_trailing = len(segment["text"]) - len(segment["text"].rstrip())
         text = segment["text"]
@@ -180,7 +189,11 @@ def align(
     
     # 2. Get prediction matrix from alignment model & align
     for sdx, segment in enumerate(transcript):
-        
+        model, align_model_metadata = load_align_model(segment['lang'], device)
+        model_dictionary = align_model_metadata["dictionary"]
+        model_lang = align_model_metadata["language"]
+        model_type = align_model_metadata["type"]
+
         t1 = segment["start"]
         t2 = segment["end"]
         text = segment["text"]

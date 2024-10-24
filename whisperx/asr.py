@@ -196,6 +196,39 @@ class FasterWhisperPipeline(Pipeline):
                 start = round(seg['start'] * SAMPLE_RATE)
                 end = round(seg['end'] * SAMPLE_RATE)
                 seg['lang'] = self.detect_language(audio[start:end+1])
+                
+            # new_segments = []
+            # for seg in vad_segments:
+            #     current_language = None
+            #     current_segment = None
+
+            #     for start, end in seg['segments']:
+            #         start_idx = round(start * SAMPLE_RATE)
+            #         end_idx = round(end * SAMPLE_RATE)
+            #         detected_language = self.detect_language(audio[start_idx:end_idx+1])
+
+            #         if detected_language != current_language:
+            #             if current_segment:
+            #                 # Finish the current segment and add it to new_segments.
+            #                 new_segments.append(current_segment)
+
+            #             # Start a new segment with the new language.
+            #             current_segment = {
+            #                 'start': start,
+            #                 'end': end,
+            #                 'segments': [(start, end)],
+            #                 'lang': detected_language
+            #             }
+            #             current_language = detected_language
+            #         else:
+            #             # Extend the current segment.
+            #             current_segment['end'] = end
+            #             current_segment['segments'].append((start, end))
+
+            #     # Don't forget to add the last segment in the loop.
+            #     if current_segment:
+            #         new_segments.append(current_segment)
+            # vad_segments[:] = new_segments
         else:         
             if self.tokenizer is None:
                 language = language or self.detect_language(audio)

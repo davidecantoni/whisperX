@@ -201,6 +201,7 @@ def align(
         aligned_seg: SingleAlignedSegment = {
             "start": t1,
             "end": t2,
+            "language": segment['lang'],
             "text": text,
             "words": [],
         }
@@ -334,6 +335,7 @@ def align(
             
             aligned_subsegments.append({
                 "text": sentence_text,
+                "lang": segment['lang'],
                 "start": sentence_start,
                 "end": sentence_end,
                 "words": sentence_words,
@@ -355,7 +357,7 @@ def align(
             agg_dict["text"] = "".join
         if return_char_alignments:
             agg_dict["chars"] = "sum"
-        aligned_subsegments= aligned_subsegments.groupby(["start", "end"], as_index=False).agg(agg_dict)
+        aligned_subsegments= aligned_subsegments.groupby(["start", "end", "lang"], as_index=False).agg(agg_dict)
         aligned_subsegments = aligned_subsegments.to_dict('records')
         aligned_segments += aligned_subsegments
 

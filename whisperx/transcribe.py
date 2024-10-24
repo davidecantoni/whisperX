@@ -31,6 +31,7 @@ def cli():
 
     parser.add_argument("--task", type=str, default="transcribe", choices=["transcribe", "translate"], help="whether to perform X->X speech recognition ('transcribe') or X->English translation ('translate')")
     parser.add_argument("--language", type=str, default=None, choices=sorted(LANGUAGES.keys()) + sorted([k.title() for k in TO_LANGUAGE_CODE.keys()]), help="language spoken in the audio, specify None to perform language detection")
+    parser.add_argument("--multi_language_detect", action="store_true", help="Detect lanuguage for each segment of audio, and transcribe accoringly.")
 
     # alignment params
     parser.add_argument("--align_model", default=None, help="Name of phoneme-level ASR model to do alignment")
@@ -168,7 +169,7 @@ def cli():
     tmp_results = []
     # model = load_model(model_name, device=device, download_root=model_dir)
     model = load_model(model_name, device=device, device_index=device_index, download_root=model_dir, compute_type=compute_type, language=args['language'], asr_options=asr_options, vad_options={"vad_onset": vad_onset, "vad_offset": vad_offset}, task=task, threads=faster_whisper_threads)
-
+    model.multi_language_detect = args.pop("multi_language_detect") if "multi_language_detect" in args else False
     for audio_path in args.pop("audio"):
         audio = load_audio(audio_path)
         # >> VAD & ASR

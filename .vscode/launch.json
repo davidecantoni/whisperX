@@ -1,0 +1,55 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "python": "${workspaceFolder}/.venv/bin/python3.11",
+            "cwd": "${workspaceFolder}/cwd",
+            "env": {
+//                "PYTHONPATH": "${env:PYTHONPATH}:/home/ruhollah/ai/atp/nanoGPT"
+            }
+        },
+        {
+            "name": "Python module",
+            "type": "python",
+            "request": "launch",
+            "module": "whisperx",
+            "args": [
+                "trim-test.wav",
+                //"romanian.mp3",
+                "--model", "large", //"/home/ruhollah/ai/whisperX/cwd/models/faster-whisper-medium.en",
+                // "--diarize",
+                "--highlight_words", "True",
+                //"--language", "af",
+                // "--hf", "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",
+                "--compute_type", "int8", 
+                // "--language", "en",
+                "--verbose", "True",
+                // "--spk_seg", "132",
+                // "--suppress_numerals", 
+                // "--align_model", "HUBERT_ASR_XLARGE" //"/home/ruhollah/tmp/hubert_fairseq_xlarge_ll60k.pth"
+                "--multi_language_detect"
+            ],
+            "python": "${workspaceFolder}/.venv/bin/python3.11",
+            "cwd": "${workspaceFolder}/cwd",
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "type": "bashdb",
+            "request": "launch",
+            "name": "Bash-Debug (type in script name)",
+            "cwd": "${workspaceFolder}",
+            "program": "${file}",
+            "args": []
+        },
+    ]
+}

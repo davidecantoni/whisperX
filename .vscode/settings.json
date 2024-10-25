@@ -1,0 +1,10 @@
+{
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python3.11",    
+    "editor.fontSize": 16, 
+    "terminal.integrated.scrollback": 100000, 
+    "workbench.colorTheme": "Visual Studio Dark",
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 30000,
+    "git.ignoreLimitWarning": true
+} 
+ 

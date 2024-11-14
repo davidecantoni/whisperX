@@ -43,7 +43,8 @@ DEFAULT_ALIGN_MODELS_HF = {
     "ar": "jonatasgrosman/wav2vec2-large-xlsr-53-arabic",
     "cs": "comodoro/wav2vec2-xls-r-300m-cs-250",
     "ru": "jonatasgrosman/wav2vec2-large-xlsr-53-russian",
-    "pl": "jonatasgrosman/wav2vec2-large-xlsr-53-polish",
+    # "pl": "jonatasgrosman/wav2vec2-large-xlsr-53-polish",
+    "pl": "facebook/wav2vec2-large-xlsr-53-polish",
     "hu": "jonatasgrosman/wav2vec2-large-xlsr-53-hungarian",
     "fi": "jonatasgrosman/wav2vec2-large-xlsr-53-finnish",
     "fa": "jonatasgrosman/wav2vec2-large-xlsr-53-persian",
@@ -60,10 +61,15 @@ DEFAULT_ALIGN_MODELS_HF = {
     "ml": "gvs/wav2vec2-large-xlsr-malayalam",
     "no": "NbAiLab/nb-wav2vec2-1b-bokmaal",
     "nn": "NbAiLab/nb-wav2vec2-300m-nynorsk",
-    "sk": "comodoro/wav2vec2-xls-r-300m-sk-cv8",
+    # "sk": "comodoro/wav2vec2-xls-r-300m-sk-cv8",
+    "sk": "infinitejoy/wav2vec2-large-xls-r-300m-slovak",
     "sl": "anton-l/wav2vec2-large-xlsr-53-slovenian",
-    "hr": "classla/wav2vec2-xls-r-parlaspeech-hr",
+    # "hr": "classla/wav2vec2-xls-r-parlaspeech-hr",
+    "hr": "dnikolic/wav2vec2-xlsr-530-serbian-colab",
     "cy": "Srulikbdd/Wav2Vec2-large-xlsr-welsh",
+    "ro": "gigant/romanian-wav2vec2",
+    "sr": "dnikolic/wav2vec2-xlsr-530-serbian-colab",
+    "bg": "infinitejoy/wav2vec2-large-xls-r-300m-bulgarian",
 }
 
 

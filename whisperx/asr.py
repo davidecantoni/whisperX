@@ -229,35 +229,36 @@ class FasterWhisperPipeline(Pipeline):
             onset=self._vad_params["vad_onset"],
             offset=self._vad_params["vad_offset"],
         )
-        if self.tokenizer is None:
-            if vad_segments:
-                longest_idx = max(range(len(vad_segments)), key=lambda i: vad_segments[i]['end'] - vad_segments[i]['start'])
-                start = round(vad_segments[longest_idx]['start'] * SAMPLE_RATE)
-                end = round(vad_segments[longest_idx]['end'] * SAMPLE_RATE)
-            else:
-                start = 0
-                end = CHUNK_LENGTH * SAMPLE_RATE - 1
-            language = language or self.detect_language(audio[start:end+1])
-            if language == "sr":
-                print("Changing language from sr (Serbian) to hr (Croatian)")
-                language = "hr"
+        if self.multi_language_detect:
             task = task or "transcribe"
-            self.tokenizer = faster_whisper.tokenizer.Tokenizer(
-                self.model.hf_tokenizer,
-                self.model.model.is_multilingual,
-                task=task,
-                language=language,
-            )
-        else:
-            language = language or self.tokenizer.language_code
-            task = task or self.tokenizer.task
-            if task != self.tokenizer.task or language != self.tokenizer.language_code:
+            for seg in vad_segments:
+                start = round(seg['start'] * SAMPLE_RATE)
+                end = round(seg['end'] * SAMPLE_RATE)
+                seg['lang'] = self.detect_language(audio[start:end+1])
+        else:         
+            if self.tokenizer is None:
+                language = language or self.detect_language(audio)
+                if language == "sr":
+                    print("Changing language from sr (Serbian) to hr (Croatian)")
+                    language = "hr"
+                task = task or "transcribe"
+
                 self.tokenizer = faster_whisper.tokenizer.Tokenizer(
                     self.model.hf_tokenizer,
                     self.model.model.is_multilingual,
                     task=task,
                     language=language,
                 )
+            else:
+                language = language or self.tokenizer.language_code
+                task = task or self.tokenizer.task
+                if task != self.tokenizer.task or language != self.tokenizer.language_code:
+                    self.tokenizer = faster_whisper.tokenizer.Tokenizer(
+                        self.model.hf_tokenizer,
+                        self.model.model.is_multilingual,
+                        task=task,
+                        language=language,
+                    )
 
         if self.suppress_numerals:
             previous_suppress_tokens = self.options.suppress_tokens
@@ -267,32 +268,53 @@ class FasterWhisperPipeline(Pipeline):
             new_suppressed_tokens = list(set(new_suppressed_tokens))
             self.options = self.options._replace(suppress_tokens=new_suppressed_tokens)
 
+        lang_vad_segments = []
+        if vad_segments:
+            if self.multi_language_detect:
+                #elements of lang_vad_segments are consecutive sublists of vad_segments, each sublist with same lang.
+                # Initialize the first group with the first segment
+                current_group = [vad_segments[0]]
+                # Iterate through the vad_segments starting from the second element
+                for segment in vad_segments[1:]:
+                    # If the current segment has the same 'lang' as the last one in the current group, append it to the current group
+                    if segment['lang'] == current_group[-1]['lang']:
+                        current_group.append(segment)
+                    else:
+                        # Otherwise, add the current group to the list of grouped segments
+                        lang_vad_segments.append(current_group)
+                        # Start a new group with the current segment
+                        current_group = [segment]
+                # Add the final group to the list
+                lang_vad_segments.append(current_group)
+            else:
+                lang_vad_segments.append(vad_segments)
+
         segments: List[SingleSegment] = []
         batch_size = batch_size or self._batch_size
         total_segments = len(vad_segments)
-        for idx, out in enumerate(
-            self.__call__(
-                data(audio, vad_segments),
-                batch_size=batch_size,
-                num_workers=num_workers,
-            )
-        ):
-            if print_progress:
-                base_progress = ((idx + 1) / total_segments) * 100
-                percent_complete = (
-                    base_progress / 2 if combined_progress else base_progress
+        for lvs in lang_vad_segments:        
+            progress = 0
+            if self.multi_language_detect:
+                self.tokenizer = faster_whisper.tokenizer.Tokenizer(self.model.hf_tokenizer,
+                                                                    self.model.model.is_multilingual, task=task,
+                                                                    language=lvs[0]['lang'])
+            for idx, out in enumerate(self.__call__(data(audio, lvs), batch_size=batch_size, num_workers=num_workers)):
+                if print_progress:
+                    base_progress = ((progress + idx + 1) / total_segments) * 100
+                    percent_complete = base_progress / 2 if combined_progress else base_progress
+                    print(f"Progress: {percent_complete:.2f}%...")
+                text = out['text']
+                if batch_size in [0, 1, None]:
+                    text = text[0]
+                segments.append(
+                    {
+                        "text": text,
+                        "start": round(lvs[idx]['start'], 3),
+                        "end": round(lvs[idx]['end'], 3),
+                        "lang": lvs[0]['lang']
+                    }
                 )
-                print(f"Progress: {percent_complete:.2f}%...")
-            text = out["text"]
-            if batch_size in [0, 1, None]:
-                text = text[0]
-            segments.append(
-                {
-                    "text": text,
-                    "start": round(vad_segments[idx]["start"], 3),
-                    "end": round(vad_segments[idx]["end"], 3),
-                }
-            )
+            progress += len(lvs)
 
         # revert the tokenizer if multilingual inference is enabled
         if self.preset_language is None:

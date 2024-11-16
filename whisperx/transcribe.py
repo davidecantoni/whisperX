@@ -37,6 +37,7 @@ def cli():
 
     parser.add_argument("--task", type=str, default="transcribe", choices=["transcribe", "translate"], help="whether to perform X->X speech recognition ('transcribe') or X->English translation ('translate')")
     parser.add_argument("--language", type=str, default=None, choices=sorted(LANGUAGES.keys()) + sorted([k.title() for k in TO_LANGUAGE_CODE.keys()]), help="language spoken in the audio, specify None to perform language detection")
+    parser.add_argument("--multi_language_detect", action="store_true", help="Detect lanuguage for each segment of audio, and transcribe accoringly.")
 
     # alignment params
     parser.add_argument("--align_model", default=None, help="Name of phoneme-level ASR model to do alignment")
@@ -188,6 +189,8 @@ def cli():
         threads=faster_whisper_threads,
     )
 
+    model.multi_language_detect = args.pop("multi_language_detect") if "multi_language_detect" in args else False
+
     for audio_path in args.pop("audio"):
         audio = load_audio(audio_path)
         # >> VAD & ASR
@@ -209,9 +212,6 @@ def cli():
     if not no_align:
         tmp_results = results
         results = []
-        align_model, align_metadata = load_align_model(
-            align_language, device, model_name=align_model
-        )
         for result, audio_path in tmp_results:
             # >> Align
             if len(tmp_results) > 1:
@@ -220,20 +220,12 @@ def cli():
                 # lazily load audio from part 1
                 input_audio = audio
 
-            if align_model is not None and len(result["segments"]) > 0:
-                if result.get("language", "en") != align_metadata["language"]:
-                    # load new language
-                    print(
-                        f"New language found ({result['language']})! Previous was ({align_metadata['language']}), loading new alignment model for new language..."
-                    )
-                    align_model, align_metadata = load_align_model(
-                        result["language"], device
-                    )
+            if len(result["segments"]) > 0:
                 print(">>Performing alignment...")
                 result = align(
                     result["segments"],
-                    align_model,
-                    align_metadata,
+                    None,
+                    None,
                     input_audio,
                     device,
                     interpolate_method=interpolate_method,

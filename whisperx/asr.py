@@ -241,6 +241,9 @@ class FasterWhisperPipeline(Pipeline):
                 if language == "sr":
                     print("Changing language from sr (Serbian) to hr (Croatian)")
                     language = "hr"
+                if language == "oc":
+                    print("Changing language from oc (Occitan) to fr (French)")
+                    language = "fr"
                 task = task or "transcribe"
 
                 self.tokenizer = faster_whisper.tokenizer.Tokenizer(

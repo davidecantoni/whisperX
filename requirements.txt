@@ -1,6 +1,9 @@
+torch==2.5.1
+torchaudio==2.5.1
 faster-whisper==1.0.3
 transformers~=4.46.0
 pandas~=2.2.3
 setuptools>=75.2.0
 nltk~=3.9.1
 ctranslate2==4.4.0
+numpy==1.26.4 #required for https://huggingface.co/pyannote/speaker-diarization-3.1/tree/main

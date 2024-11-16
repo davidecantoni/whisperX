@@ -8,7 +8,7 @@ import torch
 from transformers import Pipeline
 from transformers.pipelines.pt_utils import PipelineIterator
 
-from .audio import N_SAMPLES, SAMPLE_RATE, load_audio, log_mel_spectrogram
+from .audio import CHUNK_LENGTH, N_SAMPLES, SAMPLE_RATE, load_audio, log_mel_spectrogram
 from .types import SingleSegment, TranscriptionResult
 from .vad import load_vad_model, merge_chunks
 
@@ -230,7 +230,17 @@ class FasterWhisperPipeline(Pipeline):
             offset=self._vad_params["vad_offset"],
         )
         if self.tokenizer is None:
-            language = language or self.detect_language(audio)
+            if vad_segments:
+                longest_idx = max(range(len(vad_segments)), key=lambda i: vad_segments[i]['end'] - vad_segments[i]['start'])
+                start = round(vad_segments[longest_idx]['start'] * SAMPLE_RATE)
+                end = round(vad_segments[longest_idx]['end'] * SAMPLE_RATE)
+            else:
+                start = 0
+                end = CHUNK_LENGTH * SAMPLE_RATE - 1
+            language = language or self.detect_language(audio[start:end+1])
+            if language == "sr":
+                print("Changing language from sr (Serbian) to hr (Croatian)")
+                language = "hr"
             task = task or "transcribe"
             self.tokenizer = faster_whisper.tokenizer.Tokenizer(
                 self.model.hf_tokenizer,

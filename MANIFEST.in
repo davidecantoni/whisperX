@@ -1,3 +1,4 @@
+include whisperx/models/*
 include whisperx/assets/*
 include whisperx/assets/gpt2/*
 include whisperx/assets/multilingual/*
